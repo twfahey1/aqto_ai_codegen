@@ -33,7 +33,7 @@ final class Generator {
     $info_file_contents = "name: '$module_name'\n" .
       "type: module\n" .
       "description: 'A module'\n" .
-      "core: 10.x\n" .
+      "core_version_requirement: 10.x\n" .
       "package: 'Custom'\n";
     
     file_put_contents($info_file, $info_file_contents);

@@ -1,0 +1,18 @@
+{
+    "name": "twfahey1/aqto_ai_codegen",
+    "type": "drupal-module",
+    "description": "A Drupal module which provides site code scaffolding integrating with Aqto AI Core.",
+    "keywords": ["Drupal", "module"],
+    "homepage": "https://github.com/twfahey1/aqto_ai_core",
+    "license": "GPL-2.0+",
+    "authors": [
+        {
+            "name": "Tyler Fahey",
+            "email": "twfahey1@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "twfahey1/aqto_ai_core": "dev-master"
+    }
+}

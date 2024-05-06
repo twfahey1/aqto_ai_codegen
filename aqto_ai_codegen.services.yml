@@ -1,0 +1,4 @@
+services:
+  aqto_ai_codegen.generator:
+    class: Drupal\aqto_ai_codegen\Generator
+    arguments: ['@aqto_ai_core.utilities']

@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Aqto AI Codegen module.
+ */
+
+/**
+ * Implements hook_aqto_ai_actions_available().
+
+ * @return array
+ */
+function aqto_ai_codegen_aqto_ai_actions_available(): array
+{
+    return [
+        'create_a_module' => [
+            [
+                'description' => 'Create a new module with a .info.yml and .module file.',
+                'service_name' => 'aqto_ai_codegen.generator',
+                'method' => 'generateModuleScaffold',
+                'args' => [
+                    'module_name' => 'The module name',
+                ],
+            ],
+        ],
+    ];
+}

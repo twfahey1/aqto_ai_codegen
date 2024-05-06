@@ -1,0 +1,7 @@
+name: 'Aqto AI Codegen'
+type: module
+description: 'Generates code for the site leveraging Aqto AI.'
+package: Aqto
+core_version_requirement: ^10 || ^11
+dependencies:
+  - aqto_ai_core

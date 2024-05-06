@@ -13,6 +13,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "twfahey1/aqto_ai_core": "dev-master"
+        "twfahey1/aqto_ai_core": "dev-main"
     }
 }

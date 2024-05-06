@@ -23,5 +23,79 @@ function aqto_ai_codegen_aqto_ai_actions_available(): array
                 ],
             ],
         ],
+        // 'create_a_theme_function' => [
+        //     [
+        //         'description' => 'Create a new theme function inside a given module name .module file.',
+        //         'service_name' => 'aqto_ai_codegen.generator',
+        //         'method' => 'generateThemeFunction',
+        //         'args' => [
+        //             'module_name' => 'The module name',
+        //             'hook_name' => 'The hook name',
+        //             'variables' => 'The variables',
+        //         ],
+        //     ],
+        // ],
+        // 'create_a_theme' => [
+        //     [
+        //         'description' => 'Create a new theme with a hook_theme() implementation.',
+        //         'service_name' => 'aqto_ai_codegen.generator',
+        //         'method' => 'generateThemeScaffold',
+        //         'args' => [
+        //             'theme_name' => 'The theme name',
+        //             'variables' => 'The variables',
+        //         ],
+        //     ],
+        // ],
+        // 'create_a_block' => [
+        //     [
+        //         'description' => 'Create a new block with a block plugin.',
+        //         'service_name' => 'aqto_ai_codegen.generator',
+        //         'method' => 'generateBlockScaffold',
+        //         'args' => [
+        //             'block_name' => 'The block name',
+        //             'block_description' => 'The block description',
+        //         ],
+        //     ],
+        // ],
+        // 'create_a_template' => [
+        //     [
+        //         'description' => 'Create a new template file.',
+        //         'service_name' => 'aqto_ai_codegen.generator',
+        //         'method' => 'generateTemplateScaffold',
+        //         'args' => [
+        //             'template_name' => 'The template name',
+        //             'template_description' => 'The template description',
+        //         ],
+        //     ],
+        // ],
+        // We want a function for our:
+            // public function generatePluginBlockAndThemeAndTemplate($module, $block_name, $block_primitive_values, $theme_name, $theme_variables, $theme_template_name) {
+            //     /**
+            //      * WE want to generate files for a block, theme, and template.
+            //      * Lets assume we have the module, if we dont, lets call the function to create it. 
+            //      * - THen, we need to implement a a new theme function that will be used to render the block. This happens inside the $module.module file via a hook_theme(). Be sure to respeect existing hook_theme() functions if exist or create new if needed.
+            //      * - Next we'll scaffold the plugin block and write that data, we want to make sure to include the primitive types e.g. string, number, etc. fields from those arrays. It should map to our theme and implement a render array like #theme and all the necessary variables. 
+            //      *  -Once we've written the plugin block, we'll create a new twig template that leverages TailwindCSS classes to make a presentation for all the primitive types. This should have already been referenced in the step where we implemented hook_theme()/
+            //      */
+            //     $this->generateThemeFunction($module, $theme_name, $theme_variables);
+            //     $this->generatePluginBlock($module, $block_name, $block_primitive_values, $theme_name);
+            //     $this->generateTwigTemplate($module, $theme_template_name);
+            
+            //   }
+            'create_a_plugin_block_and_theme_and_template' => [
+                [
+                    'description' => 'Create a new plugin block, theme, and template.',
+                    'service_name' => 'aqto_ai_codegen.generator',
+                    'method' => 'generatePluginBlockAndThemeAndTemplate',
+                    'args' => [
+                        'module' => 'The module name',
+                        'block_name' => 'The block name',
+                        'block_primitive_values' => 'The block primitives to use in the block render array, key is the label, and value is #type form fields e.g. textfield, textarea, media, etc.',
+                        'theme_name' => 'The theme hook entry name prefixed with module name, e.g. my_module_hero_photo',
+                    ],
+                    'extra_context' => 'This function will generate a new module if it does not exist, a new theme function, a new plugin block, and a new twig template. The block will use the theme function to render the block, and the twig template will use the block render array to render the block.',
+                    
+                ],
+            ],
     ];
 }

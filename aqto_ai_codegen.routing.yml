@@ -1,0 +1,7 @@
+aqto_ai_codegen.builder:
+  path: '/aqto-ai-codegen/builder'
+  defaults:
+    _title: 'Builder'
+    _form: 'Drupal\aqto_ai_codegen\Form\BuilderForm'
+  requirements:
+    _permission: 'administer aqto_ai_codegen configuration'

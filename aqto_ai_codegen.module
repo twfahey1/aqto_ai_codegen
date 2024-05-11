@@ -82,20 +82,21 @@ function aqto_ai_codegen_aqto_ai_actions_available(): array
             //     $this->generateTwigTemplate($module, $theme_template_name);
             
             //   }
-            'create_a_plugin_block_and_theme_and_template' => [
+            'create_a_plugin_block_and_theme_and_template_aka_component' => [
                 [
-                    'description' => 'Create a new plugin block, theme, and template.',
+                    'description' => 'Create a new plugin block, theme, and template, known as a component',
                     'service_name' => 'aqto_ai_codegen.generator',
                     'method' => 'generatePluginBlockAndThemeAndTemplate',
                     'args' => [
                         'module' => 'The module name',
                         'block_name' => 'The block name',
-                        'block_primitive_values' => 'The block primitives to use in the block render array, key is the label, and value is #type form fields e.g. textfield, textarea, media, etc.',
+                        'variables' => 'The block primitives to use in the block render array. The key is the label, which should be lowercase and no spaces, use underscore for spaces. Possible values should be valid #type Drupal form field types e.g. textfield, textarea, image, etc.',
                         'theme_name' => 'The theme hook entry name prefixed with module name, e.g. my_module_hero_photo',
                     ],
                     'extra_context' => 'This function will generate a new module if it does not exist, a new theme function, a new plugin block, and a new twig template. The block will use the theme function to render the block, and the twig template will use the block render array to render the block.',
                     
                 ],
             ],
+            
     ];
 }

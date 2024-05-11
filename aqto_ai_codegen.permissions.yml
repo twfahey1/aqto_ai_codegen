@@ -1,0 +1,4 @@
+administer aqto_ai_codegen configuration:
+  title: 'Administer aqto_ai_codegen configuration'
+  description: 'Access to configure the codegen of Aqto AI functionality.'
+  restrict access: true

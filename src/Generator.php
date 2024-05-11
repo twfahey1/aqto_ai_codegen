@@ -42,9 +42,15 @@ final class Generator
     file_put_contents($info_file, $info_file_contents);
     // We will need to create a .module file.
     $module_file = $module_path . '/' . $module_name . '.module';
+    $module_file_contents = "<?php\n\n";
+    file_put_contents($module_file, $module_file_contents);
+
+
+    // now lets install
     \Drupal::service('module_installer')->install([
       $module_name
     ], TRUE);
+
   }
 
   /**
@@ -138,7 +144,7 @@ private function formatVariables($variables): string
      */
     $this->generateThemeFunction($module, $theme_name, $variables);
     $this->generatePluginBlock($module, $block_name, $variables, $theme_name);
-    $this->generateTwigTemplate($module, $theme_name, $block_name,  $variables, $theme_template_name);
+    $this->generateTwigTemplate($module, $theme_name, $block_name, $variables, $theme_template_name);
   }
 
   /**
@@ -254,10 +260,10 @@ private function formatVariables($variables): string
    * - save the file and return true.
    * 
    */
-  public function generateTwigTemplate($module, $theme_name, $block_name,  $block_primitive_values, $theme_template_name)
+  public function generateTwigTemplate($module, $theme_name, $block_name, $variables, $theme_template_name)
   {
     // Get the template getComponentAppearanceMarkupJson
-    $template_data = $this->getComponentAppearanceMarkupJson(json_encode($block_primitive_values), $theme_name);
+    $template_data = $this->getComponentAppearanceMarkupJson(json_encode($variables), $theme_name);
     $template_markup = $template_data['template_markup'];
     $sample_data = $template_data['sample'];
 
@@ -285,7 +291,7 @@ private function formatVariables($variables): string
    */
   public function getComponentAppearanceMarkupJson(string $data, string $appearance)
   {
-    $question_for_openai = "We're designing a Tailwind based component, it will be used in our Drupal site with twig. RETURN ONLY JSON with key of 'template_markup' that contains a twig template, and then also a 'sample' which contains the relevant key and values of the data with a random fun sample values. For reference here is the base64 encoded data: " . base64_encode($data) . ", and here is the appearance requirements base64 encoded: " . base64_encode($appearance);
+    $question_for_openai = "You are providing comprehensive and professional markup for a Tailwind based component. The markup should provide a comprehensive and detailed component based on the requirements, using as many Tailwind classes as is necessary, including responsive variants when necessary. It will be used in our Drupal site with Twig variables inserted. RETURN ONLY JSON with key of 'template_markup' that contains a twig template, and then also a 'sample' which contains the relevant key and values of the data with a random fun sample values. For reference here is the base64 encoded variables that you must use to match our already generated theme function: " . base64_encode($data) . ", and here are the appearance requirements to assist you as you consider the Tailwind classes, base64 encoded: " . base64_encode($appearance);
     $component_data_json = \Drupal::service('aqto_ai_core.utilities')->getOpenAiJsonResponse($question_for_openai);
     
     return $component_data_json;

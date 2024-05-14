@@ -26,7 +26,7 @@ final class BuilderForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     // Lets wrap the form in some tailwind classes to give it marginss all around
-    $form['#prefix'] = '<div class="p-4">';
+    $form['#prefix'] = '<div class="p-4"><h1 class="text-2xl font-black">Basic Component Builder</h1><p>This tool will build a basic component in a module based on the provided prompts. The strategy is to make a Plugin Block wired to a new theme function, which is wired to an accompanying twig template, and a libraries.yml will be created or updated if any external CSS/JS libraries are required for functionality.</p>';
     $form['#suffix'] = '</div>';
     $form['output'] = [
       '#type' => 'markup',

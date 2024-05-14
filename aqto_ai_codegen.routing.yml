@@ -1,7 +1,9 @@
-aqto_ai_codegen.builder:
-  path: '/aqto-ai-codegen/builder'
+aqto_ai_codegen.basic_component_builder:
+  path: '/aqto-ai-codegen/basic-component-builder'
   defaults:
-    _title: 'Builder'
-    _form: 'Drupal\aqto_ai_codegen\Form\BuilderForm'
+    _title: 'Basic Component Builder'
+    _form: 'Drupal\aqto_ai_codegen\Form\BasicComponentBuilderForm'
+  requirements:
+    _permission: 'administer aqto_ai_codegen configuration'
   requirements:
     _permission: 'administer aqto_ai_codegen configuration'

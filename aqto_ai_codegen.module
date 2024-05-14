@@ -92,6 +92,7 @@ function aqto_ai_codegen_aqto_ai_actions_available(): array
                         'block_name' => 'The block name',
                         'variables' => 'The block primitives to use in the block render array. The key is the label, which should be lowercase and no spaces, use underscore for spaces. Possible values should be valid #type Drupal form field types e.g. textfield, textarea, image, etc.',
                         'theme_name' => 'The theme hook entry name prefixed with module name, e.g. my_module_hero_photo',
+                        'appearance_details' => 'A description of the appearance and any needed JS libraries functionality of the component, such as including AlpineJS, animeJS, GSAP, etc..'
                     ],
                     'extra_context' => 'This function will generate a new module if it does not exist, a new theme function, a new plugin block, and a new twig template. The block will use the theme function to render the block, and the twig template will use the block render array to render the block.',
                     

@@ -25,6 +25,9 @@ final class BuilderForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
+    // Lets wrap the form in some tailwind classes to give it marginss all around
+    $form['#prefix'] = '<div class="p-4">';
+    $form['#suffix'] = '</div>';
     $form['output'] = [
       '#type' => 'markup',
       '#markup' => '<div id="message-output"></div>',
@@ -33,11 +36,11 @@ final class BuilderForm extends FormBase {
     $enabled_modules = \Drupal::moduleHandler()->getModuleList();
     $form['module_fieldset'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Module'),
+      '#title' => $this->t('Module selection'),
     ];
     $form['module_fieldset']['module'] = [
       '#type' => 'select',
-      '#title' => $this->t('Module'),
+      '#title' => $this->t('Pick the module to build the component in:'),
       '#options' => array_combine(array_keys($enabled_modules), array_keys($enabled_modules)),
       '#required' => TRUE,
       '#prefix' => '<div id="module-output">',
@@ -63,6 +66,7 @@ final class BuilderForm extends FormBase {
     $form['component_builder']['name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Name'),
+      '#description' => $this->t('The name of the component e.g. "ContactInfoProfile".'),
       '#required' => TRUE,
     ];
 
@@ -70,21 +74,23 @@ final class BuilderForm extends FormBase {
     $form['component_builder']['template'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Template file name'),
-      '#description' => $this->t('The name of the theme and template file to use e.g. "my-component".'),
+      '#description' => $this->t('The name of the theme and template file to use, typically matching the name above, e.g. "contact-info-profile".'),
       '#required' => TRUE,
     ];
 
     // A textarea to describe the data of the component.
     $form['component_builder']['data'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Data'),
+      '#title' => $this->t('Data / Variables'),
+      '#description' => 'List the variables that describe the data structure of the component such as "text_to_display", "media_field"."',
       '#required' => TRUE,
     ];
 
     // A textarea to describe the appearance of the component.
     $form['component_builder']['appearance'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Appearance'),
+      '#title' => $this->t('Appearance and functionality specs'),
+      '#description' => 'Describe the appearance and functionality of the component. Be as specific as possible. e.g. "Implements the ScrollMagic.js library to make the text size bigger as the user scrolls down the page."',
       '#required' => TRUE,
     ];
 

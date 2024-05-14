@@ -50,7 +50,6 @@ final class Generator
     \Drupal::service('module_installer')->install([
       $module_name
     ], TRUE);
-
   }
 
   /**
@@ -64,65 +63,65 @@ final class Generator
    * - Save file and return true
    */
   public function generateThemeFunction($module_name, $hook_name, $variables): bool
-{
+  {
     $current_path = getcwd();
     $module_path = $current_path . '/modules/' . $module_name;
     $module_file = $module_path . '/' . $module_name . '.module';
 
     // Ensure the directory exists
     if (!file_exists($module_path) && !mkdir($module_path, 0777, true)) {
-        return false; // Failed to create directory
+      return false; // Failed to create directory
     }
 
     // Initialize or read the module file
     $file_needs_php_open_tag = false;
     if (!file_exists($module_file)) {
-        $file_needs_php_open_tag = true;
-        $module_file_contents = "";
+      $file_needs_php_open_tag = true;
+      $module_file_contents = "";
     } else {
-        $module_file_contents = file_get_contents($module_file);
+      $module_file_contents = file_get_contents($module_file);
     }
 
     // Check if the theme function already exists
     if (!preg_match('/function\s+' . $module_name . '_theme\s*\(\)\s*{\s*return\s*\[/', $module_file_contents)) {
-        $module_file_contents .= ($file_needs_php_open_tag ? "<?php\n\n" : "\n") . "function {$module_name}_theme() {\n  return [\n  ];\n}\n";
+      $module_file_contents .= ($file_needs_php_open_tag ? "<?php\n\n" : "\n") . "function {$module_name}_theme() {\n  return [\n  ];\n}\n";
     }
 
     // Add new hook to theme function if it doesn't exist
     if (strpos($module_file_contents, "'$hook_name' =>") === false) {
-        $new_hook_content = $this->buildThemeFunction($hook_name, $variables);
-        $module_file_contents = $this->addNewHookToThemeFunction($module_file_contents, $new_hook_content);
+      $new_hook_content = $this->buildThemeFunction($hook_name, $variables);
+      $module_file_contents = $this->addNewHookToThemeFunction($module_file_contents, $new_hook_content);
     }
 
     // Write the updated contents back to the module file
     return file_put_contents($module_file, $module_file_contents) !== false;
-}
+  }
 
-private function addNewHookToThemeFunction($existing_contents, $new_hook_content): string
-{
+  private function addNewHookToThemeFunction($existing_contents, $new_hook_content): string
+  {
     $pattern = '/(\s*\])\s*;\s*\}\s*$/'; // Matches the closing parts of the theme function
     $replacement = "    $new_hook_content,\n  $1;\n}"; // Correctly places the new hook and ensures the function closes properly
     return preg_replace($pattern, $replacement, $existing_contents);
-}
+  }
 
-private function buildThemeFunction($hook_name, $variables): string
-{
+  private function buildThemeFunction($hook_name, $variables): string
+  {
     return "'$hook_name' => [\n" .
-           "      'variables' => [\n" .
-           $this->formatVariables($variables) .
-           "      ]\n" .
-           "    ]";
-}
+      "      'variables' => [\n" .
+      $this->formatVariables($variables) .
+      "      ]\n" .
+      "    ]";
+  }
 
-private function formatVariables($variables): string
-{
+  private function formatVariables($variables): string
+  {
     $variables = array_unique($variables); // Ensure no duplicates
     $variable_strings = [];
     foreach ($variables as $variable_key => $variable_type) {
-        $variable_strings[] = "        '$variable_key' => NULL";
+      $variable_strings[] = "        '$variable_key' => NULL";
     }
     return implode(",\n", $variable_strings) . "\n";
-}
+  }
 
 
 
@@ -158,7 +157,7 @@ private function formatVariables($variables): string
    * 
    */
   public function generatePluginBlock($module, $block_name, $block_primitive_values, $theme_name)
-{
+  {
     // Create the directories
     $current_path = getcwd();
     // Properly case the block file name, e.g., "Hero photo" to HeroPhoto.php
@@ -166,7 +165,7 @@ private function formatVariables($variables): string
     $module_path = $current_path . '/modules/' . $module;
     $block_path = $module_path . '/src/Plugin/Block';
     if (!file_exists($block_path)) {
-        mkdir($block_path, 0777, TRUE);
+      mkdir($block_path, 0777, TRUE);
     }
 
     // Create the block file
@@ -195,7 +194,7 @@ private function formatVariables($variables): string
     $block_file_contents .= "  public function defaultConfiguration() {\n";
     $block_file_contents .= "    return [\n";
     foreach ($block_primitive_values as $field_name => $type) {
-        $block_file_contents .= "      '$field_name' => '',\n";
+      $block_file_contents .= "      '$field_name' => '',\n";
     }
     $block_file_contents .= "    ] + parent::defaultConfiguration();\n";
     $block_file_contents .= "  }\n";
@@ -208,11 +207,11 @@ private function formatVariables($variables): string
     $block_file_contents .= "    \$form = parent::blockForm(\$form, \$form_state);\n";
     $block_file_contents .= "    \$config = \$this->getConfiguration();\n";
     foreach ($block_primitive_values as $field_name => $type) {
-        $block_file_contents .= "    \$form['$field_name'] = [\n";
-        $block_file_contents .= "      '#type' => '$type',\n";
-        $block_file_contents .= "      '#title' => t('" . ucfirst($field_name) . "'),\n";
-        $block_file_contents .= "      '#default_value' => isset(\$config['$field_name']) ? \$config['$field_name'] : '',\n";
-        $block_file_contents .= "    ];\n";
+      $block_file_contents .= "    \$form['$field_name'] = [\n";
+      $block_file_contents .= "      '#type' => '$type',\n";
+      $block_file_contents .= "      '#title' => t('" . ucfirst($field_name) . "'),\n";
+      $block_file_contents .= "      '#default_value' => isset(\$config['$field_name']) ? \$config['$field_name'] : '',\n";
+      $block_file_contents .= "    ];\n";
     }
     $block_file_contents .= "    return \$form;\n";
     $block_file_contents .= "  }\n";
@@ -224,7 +223,7 @@ private function formatVariables($variables): string
     $block_file_contents .= "  public function blockSubmit(\$form, FormStateInterface \$form_state) {\n";
     $block_file_contents .= "    parent::blockSubmit(\$form, \$form_state);\n";
     foreach ($block_primitive_values as $field_name => $type) {
-        $block_file_contents .= "    \$this->configuration['$field_name'] = \$form_state->getValue('$field_name');\n";
+      $block_file_contents .= "    \$this->configuration['$field_name'] = \$form_state->getValue('$field_name');\n";
     }
     $block_file_contents .= "  }\n";
 
@@ -244,7 +243,7 @@ private function formatVariables($variables): string
     $block_file_contents .= "      ],\n";
     $block_file_contents .= "      '#theme' => '$theme_name',\n";
     foreach ($block_primitive_values as $field_name => $type) {
-        $block_file_contents .= "      '#$field_name' => \$config['$field_name'],\n";
+      $block_file_contents .= "      '#$field_name' => \$config['$field_name'],\n";
     }
     $block_file_contents .= "    ];\n";
     $block_file_contents .= "  }\n";
@@ -254,7 +253,7 @@ private function formatVariables($variables): string
     file_put_contents($block_file, $block_file_contents);
 
     return TRUE;
-}
+  }
 
 
 
@@ -314,42 +313,42 @@ private function formatVariables($variables): string
   {
     $question_for_openai = "You are providing comprehensive and professional markup for a Tailwind based component. The markup should provide a comprehensive and detailed component based on the requirements, using as many Tailwind classes as is necessary, including responsive variants when necessary. It will be used in our Drupal site with Twig variables inserted. If there is any needed AlpineJS, animeJS, GSAP, or JS library needed to satisfy requirements, incorporate that as inline <script> after any HTML. RETURN ONLY JSON with keys of: 'template_markup' that contains a twig template, 'assets' if needed that is a array of 'js' and 'css' which are lists of paths to CDN assets used from the template, and then also a 'sample' which contains the relevant key and values of the data with a random fun sample values. For reference here is the base64 encoded variables that you must use to match our already generated theme function: " . base64_encode($data) . ", and here are the appearance requirements to assist you as you consider the Tailwind classes and any JS libs to use, base64 encoded: " . base64_encode($appearance);
     $component_data_json = \Drupal::service('aqto_ai_core.utilities')->getOpenAiJsonResponse($question_for_openai);
-    
+
     return $component_data_json;
   }
 
   /**
- * Generates a library definition in the libraries.yml file.
- * 
- * @param string $module
- *   The name of the module.
- * @param string $library_name
- *   The name of the library.
- * @param array $css
- *   An array of CSS assets.
- * @param array $js
- *   An array of JS assets.
- * 
- * @return bool
- *   True if the library definition was successfully added, false otherwise.
- */
-public function generateLibraryDefinition(string $module, string $library_name, array $css, array $js): bool
-{
+   * Generates a library definition in the libraries.yml file.
+   * 
+   * @param string $module
+   *   The name of the module.
+   * @param string $library_name
+   *   The name of the library.
+   * @param array $css
+   *   An array of CSS assets.
+   * @param array $js
+   *   An array of JS assets.
+   * 
+   * @return bool
+   *   True if the library definition was successfully added, false otherwise.
+   */
+  public function generateLibraryDefinition(string $module, string $library_name, array $css, array $js): bool
+  {
     // Define paths
     $current_path = getcwd();
     $module_path = $current_path . '/modules/' . $module;
-    $libraries_file = $module_path . '/'.$module.'.libraries.yml';
+    $libraries_file = $module_path . '/' . $module . '.libraries.yml';
 
     // Ensure the directory exists
     if (!file_exists($module_path) && !mkdir($module_path, 0777, true)) {
-        return false; // Failed to create directory
+      return false; // Failed to create directory
     }
 
     // Initialize or read the libraries.yml file
     if (!file_exists($libraries_file)) {
-        $libraries_contents = "";
+      $libraries_contents = "";
     } else {
-        $libraries_contents = file_get_contents($libraries_file);
+      $libraries_contents = file_get_contents($libraries_file);
     }
 
     // Build the library definition
@@ -357,17 +356,17 @@ public function generateLibraryDefinition(string $module, string $library_name, 
     $library_name = str_replace('-', '_', $library_name);
     $library_definition = $library_name . ":\n";
     if (!empty($css)) {
-        $library_definition .= "  css:\n";
-        foreach ($css as $key => $path) {
-            $library_definition .= "    component:\n";
-            $library_definition .= "       $path: {}\n";
-        }
+      $library_definition .= "  css:\n";
+      foreach ($css as $key => $path) {
+        $library_definition .= "    component:\n";
+        $library_definition .= "       $path: {}\n";
+      }
     }
     if (!empty($js)) {
-        $library_definition .= "  js:\n";
-        foreach ($js as $key => $path) {
-            $library_definition .= "    $path: {}\n";
-        }
+      $library_definition .= "  js:\n";
+      foreach ($js as $key => $path) {
+        $library_definition .= "    $path: {}\n";
+      }
     }
 
     // Append the new library definition
@@ -375,6 +374,5 @@ public function generateLibraryDefinition(string $module, string $library_name, 
 
     // Write the updated contents back to the libraries.yml file
     return file_put_contents($libraries_file, $libraries_contents) !== false;
-}
-
+  }
 }

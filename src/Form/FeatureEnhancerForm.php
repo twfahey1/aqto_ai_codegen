@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Provides a Aqto AI Core form.
  */
-final class BasicComponentBuilderForm extends FormBase {
+final class FeatureEnhancerForm extends FormBase {
 
   /**
    * {@inheritdoc}
@@ -40,7 +40,7 @@ final class BasicComponentBuilderForm extends FormBase {
     ];
     $form['module_fieldset']['module'] = [
       '#type' => 'select',
-      '#title' => $this->t('Pick the module to build the component in:'),
+      '#title' => $this->t('Pick the Feature module to enhance'),
       '#options' => array_combine(array_keys($enabled_modules), array_keys($enabled_modules)),
       '#required' => TRUE,
       '#prefix' => '<div id="module-output">',
@@ -63,34 +63,18 @@ final class BasicComponentBuilderForm extends FormBase {
     ];
 
     // A textfield for the component name.
-    $form['component_builder']['name'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Name'),
-      '#description' => $this->t('The name of the component e.g. "ContactInfoProfile".'),
+    $form['component_builder']['module_requests'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Module requests'),
+      '#description' => $this->t('Things we want to build in the module file preprocess, e.g. "Our awesome_profile Paragraph type should have a preprocess to render the image field with a nice border and request the latest weather from the open weather API for the profile location."'),
       '#required' => TRUE,
     ];
 
     // A textfield for the template name.
-    $form['component_builder']['template'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Template file name'),
-      '#description' => $this->t('The name of the theme and template file to use, typically matching the name above, e.g. "contact-info-profile".'),
-      '#required' => TRUE,
-    ];
-
-    // A textarea to describe the data of the component.
-    $form['component_builder']['data'] = [
+    $form['component_builder']['theme_requests'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Data / Variables'),
-      '#description' => 'List the variables that describe the data structure of the component such as "text_to_display", "media_field"."',
-      '#required' => TRUE,
-    ];
-
-    // A textarea to describe the appearance of the component.
-    $form['component_builder']['appearance'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Appearance and functionality specs'),
-      '#description' => 'Describe the appearance and functionality of the component. Be as specific as possible. e.g. "Implements the ScrollMagic.js library to make the text size bigger as the user scrolls down the page."',
+      '#title' => $this->t('Theme and template requests'),
+      '#description' => $this->t('Provide as much detail as desired around the theme and template requests. e.g. "We want to show the location map in a modal when the user clicks the location name."'),
       '#required' => TRUE,
     ];
 
@@ -122,42 +106,24 @@ final class BasicComponentBuilderForm extends FormBase {
   /**
    * AJAX callback to process the input message and interact with AI.
    */
-  public function buildComponentAjax(array &$form, FormStateInterface $form_state): array {
+  public function buildComponentAjax(array &$form, FormStateInterface $form_state): AjaxResponse {
     // Lets get the form values.
     $module = $form_state->getValue('module');
-    $name = $form_state->getValue('name');
-    $template = $form_state->getValue('template');
-    $data = $form_state->getValue('data');
-    $appearance = $form_state->getValue('appearance');
+    $module_requests = $form_state->getValue('module_requests');
+    $template_design_requests = $form_state->getValue('theme_requests');
+
 
     $siteActionsManager = \Drupal::service('aqto_ai_core.site_actions_manager');
-    $message = 'action: create_a_plugin_block_and_theme_and_template_aka_component, module ' . $module . ', name: ' . $name . ', template: ' . $template . ', data: ' . $data . ', appearance specs:' . $appearance;
+    $message = 'action: enhance_feature, module ' . $module . ', module_requests ' . $module_requests . ', template_design_requests ' . $template_design_requests;
     $response = $siteActionsManager->invokeActionableQuestion($message);
 
 
     // Lets create a response object.
     $response = new AjaxResponse();
-    $response->addCommand(new HtmlCommand('#message-output', $this->t('Created component in the module @module with name @name, template @template, data @data, appearance @appearance', [
-      '@module' => $module,
-      '@name' => $name,
-      '@template' => $template,
-      '@data' => $data,
-      '@appearance' => $appearance,
-    ])));
-
-    // Lets build the component.
-    $component = [
-      'name' => $name,
-      'template' => $template,
-      'data' => $data,
-      'appearance' => $appearance,
-    ];
-
-    // Lets return the component as a render array.
-    return [
-      '#type' => 'markup',
-      '#markup' => '<pre>' . print_r($component, TRUE) . '</pre>',
-    ];
+    // Lets add a command to replace the output div with the response.
+    $response->addCommand(new HtmlCommand('#message-output', $response));
+    // Lets return the response.
+    return $response;
   }
 
   /**

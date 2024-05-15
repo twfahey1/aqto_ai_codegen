@@ -5,5 +5,24 @@ aqto_ai_codegen.basic_component_builder:
     _form: 'Drupal\aqto_ai_codegen\Form\BasicComponentBuilderForm'
   requirements:
     _permission: 'administer aqto_ai_codegen configuration'
+aqto_ai_codegen.paragraph_block_content_type_builder:
+  path: '/aqto-ai-codegen/paragraph-block-content-type-builder'
+  defaults:
+    _title: 'Paragraph Block Content Type Builder'
+    _form: 'Drupal\aqto_ai_codegen\Form\ParagraphBlockContentTypeBuilderForm'
+  requirements:
+    _permission: 'administer aqto_ai_codegen configuration'
+aqto_ai_codegen.workon:
+  path: '/aqto-ai-codegen/workon'
+  defaults:
+    _title: 'Workon'
+    _form: 'Drupal\aqto_ai_codegen\Form\WorkonForm'
+  requirements:
+    _permission: 'administer aqto_ai_codegen configuration'
+aqto_ai_codegen.feature_enhancer:
+  path: '/aqto-ai-codegen/feature-enhancer'
+  defaults:
+    _title: 'Feature Enhancer'
+    _form: 'Drupal\aqto_ai_codegen\Form\FeatureEnhancerForm'
   requirements:
     _permission: 'administer aqto_ai_codegen configuration'

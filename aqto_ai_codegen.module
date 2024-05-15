@@ -23,81 +23,65 @@ function aqto_ai_codegen_aqto_ai_actions_available(): array
                 ],
             ],
         ],
-        // 'create_a_theme_function' => [
-        //     [
-        //         'description' => 'Create a new theme function inside a given module name .module file.',
-        //         'service_name' => 'aqto_ai_codegen.generator',
-        //         'method' => 'generateThemeFunction',
-        //         'args' => [
-        //             'module_name' => 'The module name',
-        //             'hook_name' => 'The hook name',
-        //             'variables' => 'The variables',
-        //         ],
-        //     ],
-        // ],
-        // 'create_a_theme' => [
-        //     [
-        //         'description' => 'Create a new theme with a hook_theme() implementation.',
-        //         'service_name' => 'aqto_ai_codegen.generator',
-        //         'method' => 'generateThemeScaffold',
-        //         'args' => [
-        //             'theme_name' => 'The theme name',
-        //             'variables' => 'The variables',
-        //         ],
-        //     ],
-        // ],
-        // 'create_a_block' => [
-        //     [
-        //         'description' => 'Create a new block with a block plugin.',
-        //         'service_name' => 'aqto_ai_codegen.generator',
-        //         'method' => 'generateBlockScaffold',
-        //         'args' => [
-        //             'block_name' => 'The block name',
-        //             'block_description' => 'The block description',
-        //         ],
-        //     ],
-        // ],
-        // 'create_a_template' => [
-        //     [
-        //         'description' => 'Create a new template file.',
-        //         'service_name' => 'aqto_ai_codegen.generator',
-        //         'method' => 'generateTemplateScaffold',
-        //         'args' => [
-        //             'template_name' => 'The template name',
-        //             'template_description' => 'The template description',
-        //         ],
-        //     ],
-        // ],
-        // We want a function for our:
-            // public function generatePluginBlockAndThemeAndTemplate($module, $block_name, $block_primitive_values, $theme_name, $theme_variables, $theme_template_name) {
-            //     /**
-            //      * WE want to generate files for a block, theme, and template.
-            //      * Lets assume we have the module, if we dont, lets call the function to create it. 
-            //      * - THen, we need to implement a a new theme function that will be used to render the block. This happens inside the $module.module file via a hook_theme(). Be sure to respeect existing hook_theme() functions if exist or create new if needed.
-            //      * - Next we'll scaffold the plugin block and write that data, we want to make sure to include the primitive types e.g. string, number, etc. fields from those arrays. It should map to our theme and implement a render array like #theme and all the necessary variables. 
-            //      *  -Once we've written the plugin block, we'll create a new twig template that leverages TailwindCSS classes to make a presentation for all the primitive types. This should have already been referenced in the step where we implemented hook_theme()/
-            //      */
-            //     $this->generateThemeFunction($module, $theme_name, $theme_variables);
-            //     $this->generatePluginBlock($module, $block_name, $block_primitive_values, $theme_name);
-            //     $this->generateTwigTemplate($module, $theme_template_name);
-            
-            //   }
-            'create_a_plugin_block_and_theme_and_template_aka_component' => [
-                [
-                    'description' => 'Create a new plugin block, theme, and template, known as a component',
-                    'service_name' => 'aqto_ai_codegen.generator',
-                    'method' => 'generatePluginBlockAndThemeAndTemplate',
-                    'args' => [
-                        'module' => 'The module name',
-                        'block_name' => 'The block name',
-                        'variables' => 'The block primitives to use in the block render array. The key is the label, which should be lowercase and no spaces, use underscore for spaces. Possible values should be valid #type Drupal form field types e.g. textfield, textarea, image, etc.',
-                        'theme_name' => 'The theme hook entry name prefixed with module name, e.g. my_module_hero_photo',
-                        'appearance_details' => 'A description of the appearance and any needed JS libraries functionality of the component, such as including AlpineJS, animeJS, GSAP, etc..'
-                    ],
-                    'extra_context' => 'This function will generate a new module if it does not exist, a new theme function, a new plugin block, and a new twig template. The block will use the theme function to render the block, and the twig template will use the block render array to render the block.',
-                    
+        'create_a_plugin_block_and_theme_and_template_aka_component' => [
+            [
+                'description' => 'Create a new plugin block, theme, and template, known as a component',
+                'service_name' => 'aqto_ai_codegen.generator',
+                'method' => 'generatePluginBlockAndThemeAndTemplate',
+                'args' => [
+                    'module' => 'The module name',
+                    'block_name' => 'The block name',
+                    'variables' => 'The block primitives to use in the block render array. The key is the label, which should be lowercase and no spaces, use underscore for spaces. Possible values should be valid #type Drupal form field types e.g. textfield, textarea, image, etc.',
+                    'theme_name' => 'The theme hook entry name prefixed with module name, e.g. my_module_hero_photo',
+                    'appearance_details' => 'A description of the appearance and any needed JS libraries functionality of the component, such as including AlpineJS, animeJS, GSAP, etc..'
                 ],
+                'extra_context' => 'This function will generate a new module if it does not exist, a new theme function, a new plugin block, and a new twig template. The block will use the theme function to render the block, and the twig template will use the block render array to render the block.',
+
             ],
-            
+        ],
+        'create_paragraph_block_content_type' => [
+            [
+                'description' => 'Create a new paragraph block content type',
+                'service_name' => 'aqto_ai_codegen.generator',
+                'method' => 'generateParagraphBlockContentType',
+                'args' => [
+                    'module' => 'The module name',
+                    'name' => 'The content type name',
+                    'template' => 'The template file name',
+                    'fields' => 'The fields and nested paragraphs in JSON format',
+                    'appearance' => 'The appearance and functionality specs',
+                ],
+                'extra_context' => 'This function will generate Drupal field configuration without a UUID that will be used in a Feature module, including standard Drupal core field types and Drupal Paragraph types and a Paragraph bundle YML field configurations, and a new twig template. The paragraph bundle will use the paragraph type to render the bundle, and the twig template will use the paragraph render array to render the bundle. Data should come back with array of the necessary configuration values nested in the "fields" data that can be converted to yml.',
+            ],
+        ],
+        'enhance_feature' => [
+            [
+                'description' => 'Build a prompt that will indicate to the llm that they have base64 encoded config, and they want to return a json response with details about a design spec. Specifically, provide a "module_hooks" array of any hook_preprocess_HOOK functions that can be written directly into the the .module of the project, a "theme_hooks" that we\'ll add or ammend in the .module\'s hook_theme(), should include the "variables" key and the "template-name" key so we can write that data and create the template file.',
+                'service_name' => 'aqto_ai_codegen.feature_enhancer',
+                'method' => 'enhanceFeature',
+                'args' => [
+                    'module_name' => 'The module name',
+                    'module_requests' => 'An array of preprocess requests in natural language, such as "We want to display our image field in a nice styled round border with a hover effect". These rqeuests will be sent to the LLM to consider in scaffolding any hook_preprocess_HOOK functions.',
+                    'template_design_requests' => 'An array of template design requests. These will be sent to the LLM to consider in scaffolding any hook_theme() implementations and twig template files.',
+                ],
+                'extra_context' => 'This function will take a module name and requests, and ultimately through other actions check out updates and write to disk.',
+            ]
+        ],
+        'get_design_spec_from_module_config_and_requests' => [
+            [
+                'description' => 'Build a prompt that will indicate to the llm that they have base64 encoded config, and they want to return a json response with details about a design spec. Specifically, provide a "module_hooks" array of any hook_preprocess_HOOK functions that can be written directly into the the .module of the project, a "theme_hooks" that we\'ll add or ammend in the .module\'s hook_theme(), should include the "variables" key and the "template-name" key so we can write that data and create the template file.',
+                'service_name' => 'aqto_ai_codegen.generator',
+                'method' => 'getDesignSpecFromModuleConfig',
+                'args' => [
+                    'config_files' => 'The base64 encoded config files to consider when constructing preprocess functions and theme hooks',
+                    'module_file' => 'The base64 encoded module file to consider when constructing preprocess functions and theme hooks',
+                    'module_path' => 'The module path',
+                    'module_name' => 'The module name',
+                    'module_requests' => 'An array of preprocess requests in natural language, such as "We want to display our image field in a nice styled round border with a hover effect". These rqeuests will be sent to the LLM to consider in scaffolding any hook_preprocess_HOOK functions.',
+                    'theme_requests' => 'An array of template design requests. These will be sent to the LLM to consider in scaffolding any hook_theme() implementations and twig template files.',
+                ],
+                'extra_context' => 'This function will take a module path and base64 encoded config files and return a JSON response with details about a design spec. The design spec should have key of "file_changes" and we can loop through and process each change by writing the "new_contents" value to the "file_path" value which we should have in the payload as base64 encoded new file contents with updates provided. The design spec should also have a "module_hooks" array of any hook_preprocess_HOOK functions that can be written directly into the the .module of the project, a "theme_hooks" that we\'ll add or ammend in the .module\'s hook_theme(), should include the "variables" key and the "template-name" key so we can write that data and create the template file.',
+            ]
+        ]
     ];
 }

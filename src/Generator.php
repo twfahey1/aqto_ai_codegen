@@ -123,10 +123,6 @@ final class Generator
     return implode(",\n", $variable_strings) . "\n";
   }
 
-
-
-
-
   /**
    * A public function to generate a new Paragraph entity with desired fields.
    */
@@ -255,8 +251,6 @@ final class Generator
     return TRUE;
   }
 
-
-
   /**
    * Same for twig template.
    * 
@@ -301,7 +295,6 @@ final class Generator
     file_put_contents($template_file, $template_file_contents);
     return TRUE;
   }
-
 
   /**
    * A callback to get an openAiResponse for the questino of "provide tailwind based html markup only that is for a block, the data for the block is $data, and then design ideas are $appearance".
@@ -375,4 +368,56 @@ final class Generator
     // Write the updated contents back to the libraries.yml file
     return file_put_contents($libraries_file, $libraries_contents) !== false;
   }
+
+  // a generateParagraphBlockContentType func
+  public function generateParagraphBlockContentType($module, $name, $template, $fields, $appearance)
+  {
+    // Based on $fields we want to generateYmlConfigurations
+    $this->generateYmlConfigurations($module, $name, $fields);
+    // Based on $template we want to generateTwigTemplate
+    $this->generateTwigTemplate($module, $name, $name, $fields, $template, $appearance);
+
+    return TRUE;
+  }
+
+  /**
+   * A method to generate a new YML configuration file for a paragraph block content type.
+   */
+  public function generateYmlConfigurations($module, $name, $fields)
+  {
+    // Create the directories
+    $current_path = getcwd();
+    $module_path = $current_path . '/modules/' . $module;
+    $config_path = $module_path . '/config/install';
+    if (!file_exists($config_path)) {
+      mkdir($config_path, 0777, TRUE);
+    }
+
+    // Lets write a basic features.yml into the module so we can interact with it via features if it doesnt exist
+    $features_file = $module_path . '/' . $module . '.features.yml';
+    if (!file_exists($features_file)) {
+      // We just want to write one line  that says: required: true
+      file_put_contents($features_file, "required: true");
+    }
+      
+
+    // Create the YML file
+   // Loop through each of the $fields, and let's request info on the yml file contents that is needed via our askQuestion. We want to request that the response has like "name_of_field" and "type_of_field" and "file_contents" that is the writable data
+    $yml_data = [];
+    foreach ($fields as $field_name => $field_type) {
+      $question_for_openai = "You are providing a YML configuration for a paragraph block content type. The configuration should be in the format of a YML file that can be used in a Drupal Feature module. The configuration should include the field name, type, and any other necessary configuration options. The field name is $field_name and the field type is $field_type. RETURN ONLY JSON with all the needed config files for the configs provided so that it can be enabled as is, each of the keys: - 'all_yml' that contains all the YML configurations for the field(s) such as paragraph, field storage, all the dependencies, - each should have keys of yml and name_of_file that is the name of the file we can write for the config full file name as we loop through.";
+      $field_yml_data = \Drupal::service('aqto_ai_core.utilities')->getOpenAiJsonResponse($question_for_openai);
+      foreach ($field_yml_data['all_yml'] as $field_yml) {
+        $yml_data[$field_name] = $field_yml['yml'];
+        $file_name = $field_yml['name_of_file'];
+        $file_contents = $field_yml['yml'];
+        $file_path = $config_path . '/' . $file_name;
+        file_put_contents($file_path, $file_contents);
+      }
+    }
+    // Now we can return the yml_data
+    return $yml_data;
+  }
+
+
 }

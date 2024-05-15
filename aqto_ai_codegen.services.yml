@@ -1,4 +1,12 @@
 services:
   aqto_ai_codegen.generator:
     class: Drupal\aqto_ai_codegen\Generator
-    arguments: ['@aqto_ai_core.utilities']
+    arguments: ['@aqto_ai_core.utilities', '@aqto_ai_core.site_actions_manager']
+
+  aqto_ai_codegen.file_manager:
+    class: Drupal\aqto_ai_codegen\FileManager
+    arguments: ['@file_system', '@entity_type.manager', '@http_client']
+
+  aqto_ai_codegen.feature_enhancer:
+    class: Drupal\aqto_ai_codegen\FeatureEnhancer
+    arguments: ['@aqto_ai_core.utilities', '@aqto_ai_codegen.file_manager', '@aqto_ai_core.site_actions_manager']

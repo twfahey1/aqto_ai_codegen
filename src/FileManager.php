@@ -43,8 +43,8 @@ final class FileManager {
 
       if (is_file($fullPath)) {
         $result['files'][] = $fullPath;
-      } elseif (is_dir($fullPath) && $entry !== "." && $entry !== "..") {
-        $result['folders'][] = $entry;
+      } elseif (is_dir($fullPath) && $entry !== "." && $entry !== ".." && $entry !== ".git") {
+        $result['folders'][] = $fullPath;
       }
     }
 

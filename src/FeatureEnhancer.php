@@ -76,6 +76,43 @@ final class FeatureEnhancer
   }
 
   /**
+   * A helper to get *all* the files and folders recursively, returning a nicely structured array of full realpath to file => base64 encoded contents of file.
+   * 
+   * @param string $path
+   * The path to the directory.
+   * 
+   * @return array
+   * An array of file paths and base64 encoded file contents.
+   */
+  public function getAllFilesAndFoldersAsBase64(string $path): array
+  {
+    $files_and_folders = $this->fileManager->listFilesInDirectory($path);
+    // We'll have an array of files with absolute paths, and array of folders. Let's ignore any folders prefixed with ".", and any others, we can recursively get those files and add to the overall array of files.
+    $master_file_list_with_contents = [];
+    foreach ($files_and_folders['files'] as $file) {
+      $fileContents = file_get_contents($file);
+      $master_file_list_with_contents[$file] = base64_encode($fileContents);
+    }
+    // Now we need to loop through the folders and recursively get the files and add to the master list.
+    foreach ($files_and_folders['folders'] as $folder) {
+      $folder_files = $this->fileManager->listFilesInDirectory($folder);
+      foreach ($folder_files['files'] as $file) {
+        $fileContents = file_get_contents($file);
+        $master_file_list_with_contents[$file] = base64_encode($fileContents);
+      }
+      // Go one more level for config
+      foreach ($folder_files['folders'] as $subfolder) {
+        $subfolder_files = $this->fileManager->listFilesInDirectory($subfolder);
+        foreach ($subfolder_files['files'] as $file) {
+          $fileContents = file_get_contents($file);
+          $master_file_list_with_contents[$file] = base64_encode($fileContents);
+        }
+      }
+    }
+    return $master_file_list_with_contents;
+  }
+
+  /**
    * A helper to get the contents of the $modulePath .module file and erturn it base 64 encoded.
    * 
    * @param string $modulePath
@@ -110,29 +147,27 @@ final class FeatureEnhancer
    * @return array
    * An array of the response data.
    */
-  public function getDesignSpecFromModuleConfig(string $moduleName, string $modulePath, $module_requests, $template_design_requests): array
+  public function getDesignSpecFromModuleConfig(string $moduleName, string $modulePath, $module_files, $module_requests, $template_design_requests): array
   {
     $configInstallFilesBase64 = $this->getModuleConfigInstallFilesAsBase64($modulePath);
     // Get the realpath to the module file
     $moduleRealPath = \Drupal::service('file_system')->realpath($modulePath);
-    $moduleFileBase64 = $this->getModuleFileContentsAsBase64($moduleName, $moduleRealPath);
     // Build the design_requirements
-    $design_requirements = "Module requests: " . print_r($module_requests, TRUE) . ', Template design requests: ' . $template_design_requests;
-    $prompt = json_encode([
+    $design_requirements = "Design requirements: " . print_r($module_requests, TRUE) . ',' . $template_design_requests;
+    $prompt = base64_encode(json_encode([
       'design_requirements' => $design_requirements,
-      'config_files' => $configInstallFilesBase64,  
-      'module_file' => $moduleFileBase64,
-      'module_path' => $modulePath,
+      'module_files' => $module_files,
+      'module_path' => $moduleRealPath,
       'module_name' => $moduleName,
-      'module_requests' => $module_requests,
-      'theme_requests' => $template_design_requests,
-    ]);
-    $prompt = 'CRITICAL: RETURN JSON ONLY! which provides revised copies of the files in a "revised_files" array, where each key is filename, and value is updated code base64 encoded to meet the design_requirements: Here is the data' . $prompt;
+    ]));
+    $prompt = 'CRITICAL: RETURN JSON ONLY! Working with the Drupal 10 module data which has been freshly parsed. Consider the design_requirements compared with the module_files, and provide revised versions of the files that need changes in a "revised_files" array, where each key is filename, and value is updated code, and its base64 encoded. When appropriate, include new files, e.g. a libraries.yml for new assets used in the newly defined theme function, and for new files provide a reasonable file path name based on available context. Here is the JSON spec data in base64:' . $prompt;
     $response = $this->aqtoAiCoreUtilities->getOpenAiJsonResponse($prompt);
+    // Lets log out the raw response json for audting in watchdog
+    \Drupal::logger('aqto_ai_codegen')->info('Raw response json: ' . json_encode($response));
     // At this point we have a 'revised_files' array, loop through and for each, base64 decode the 'value' key and then write it to the 'filename' path.
-    foreach ($response['revised_files'] as $filename => $fileContentsBase64) {
-      $fileContents = base64_decode($fileContentsBase64['value']);
-      $this->fileManager->writeFile($fileContentsBase64['filename'], $fileContents);
+    foreach ($response['revised_files'] as $file_key => $file_vals) {
+      $fileContents = base64_decode($file_vals['content'] ?? $file_vals['value'] ?? '');
+      $this->fileManager->writeFile($file_vals['filename'], $fileContents);
     }
     
     return $this->getStandardizedResult('get_design_spec_from_module_config_and_requests', $response);
@@ -145,7 +180,9 @@ final class FeatureEnhancer
   {
     // Get path to module_name
     $modulePath = \Drupal::moduleHandler()->getModule($module_name)->getPath();
-    $design_spec_computed = $this->getDesignSpecFromModuleConfig($module_name, $modulePath, $module_requests, $template_design_requests);
+    // Get all the files in the module and the base64 encoded the contents.
+    $module_files = $this->getAllFilesAndFoldersAsBase64($modulePath);
+    $design_spec_computed = $this->getDesignSpecFromModuleConfig($module_name, $modulePath, $module_files, $module_requests, $template_design_requests);
 
     // Todo we need to process the payload
     foreach ($design_spec_computed['file_changes'] as $file_change) {

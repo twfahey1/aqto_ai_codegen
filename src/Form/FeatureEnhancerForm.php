@@ -38,7 +38,7 @@ final class FeatureEnhancerForm extends FormBase {
       '#type' => 'fieldset',
       '#title' => $this->t('Module selection'),
     ];
-    $form['module_fieldset']['module'] = [
+    $form['module_fieldset']['module_name'] = [
       '#type' => 'select',
       '#title' => $this->t('Pick the Feature module to enhance'),
       '#options' => array_combine(array_keys($enabled_modules), array_keys($enabled_modules)),
@@ -62,19 +62,14 @@ final class FeatureEnhancerForm extends FormBase {
       '#title' => $this->t('Component Builder'),
     ];
 
-    // A textfield for the component name.
-    $form['component_builder']['module_requests'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Module requests'),
-      '#description' => $this->t('Things we want to build in the module file preprocess, e.g. "Our awesome_profile Paragraph type should have a preprocess to render the image field with a nice border and request the latest weather from the open weather API for the profile location."'),
-      '#required' => TRUE,
-    ];
+    // TODO: We need to have a file selector that shows whenever we select a module. It should show all the contents and allow selecting one or more of the files, that we'll send in the payload specifically.
 
-    // A textfield for the template name.
-    $form['component_builder']['theme_requests'] = [
+
+    // A textfield for the component name.
+    $form['component_builder']['custom_requests'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Theme and template requests'),
-      '#description' => $this->t('Provide as much detail as desired around the theme and template requests. e.g. "We want to show the location map in a modal when the user clicks the location name."'),
+      '#title' => $this->t('Custom update requests'),
+      '#description' => $this->t('Things about the update that we want to include, such as "Add a new field to the form that allows the user to upload a file."'),
       '#required' => TRUE,
     ];
 
@@ -108,13 +103,13 @@ final class FeatureEnhancerForm extends FormBase {
    */
   public function buildComponentAjax(array &$form, FormStateInterface $form_state): AjaxResponse {
     // Lets get the form values.
-    $module = $form_state->getValue('module');
-    $module_requests = $form_state->getValue('module_requests');
-    $template_design_requests = $form_state->getValue('theme_requests');
-
+    $module_name = $form_state->getValue('module_name');
+    // TODO: Implement the selectables above for the specific files to update.
+    $files_to_update = $form_state->getValue('files_to_update');
+    $custom_requests = $form_state->getValue('custom_requests');
 
     $siteActionsManager = \Drupal::service('aqto_ai_core.site_actions_manager');
-    $message = 'action: enhance_feature, module ' . $module . ', module_requests ' . $module_requests . ', template_design_requests ' . $template_design_requests;
+    $message = 'action: enhance_feature, module_name ' . $module_name . ', files_to_update: ' . implode(',', $files_to_update) . ', custom_requests: ' . $custom_requests;
     $response = $siteActionsManager->invokeActionableQuestion($message);
 
 
@@ -130,23 +125,14 @@ final class FeatureEnhancerForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
-    // @todo Validate the form here.
-    // Example:
-    // @code
-    //   if (mb_strlen($form_state->getValue('message')) < 10) {
-    //     $form_state->setErrorByName(
-    //       'message',
-    //       $this->t('Message should be at least 10 characters.'),
-    //     );
-    //   }
-    // @endcode
+    // @todo Validate the form here if needed.
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    
+    // Nothing in actual submit yet, all AJAX callbacks.
   }
 
 }

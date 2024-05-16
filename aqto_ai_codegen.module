@@ -61,7 +61,7 @@ function aqto_ai_codegen_aqto_ai_actions_available(): array
                 'method' => 'enhanceFeature',
                 'args' => [
                     'module_name' => 'The module name',
-                    'files_to_update' => 'An array of preprocess requests in natural language, such as "We want to display our image field in a nice styled round border with a hover effect". These rqeuests will be sent to the LLM to consider in scaffolding any hook_preprocess_HOOK functions.',
+                    'files_to_update' => 'An array of base64 encoded files to use in the update.',
                     'custom_requests' => 'An array of template design requests. These will be sent to the LLM to consider in scaffolding any hook_theme() implementations and twig template files.',
                 ],
                 'extra_context' => 'This function will take a module name and requests, and ultimately through other actions check out updates and write to disk.',

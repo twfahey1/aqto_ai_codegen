@@ -133,6 +133,50 @@ final class FeatureEnhancer
   }
 
   /**
+   * A function that takes module_name, an array of file paths, and text of custom_requests. We build an array of the file contents base64 encoded. Then we prompt openAI to generate a return array of "revised_files" with the paths and new contents included, considering the custom_requests.
+   * 
+   * @param string $module_name
+   * The name of the module.
+   * 
+   * @param array $files_to_update
+   * An array of file paths to update.
+   * 
+   * @param string $custom_requests
+   * The text of the custom requests.
+   * 
+   * @return array
+   * An array of the response data.
+   */
+  public function enhanceFilesInModule(string $module_name, string $absolute_path_to_module, array $files_to_update, string $custom_requests): array
+  {
+    // Fore ach of our fiels_to_update, loop through and generate th base74 contents
+    $files_to_update_base64 = [];
+    foreach ($files_to_update as $file) {
+      $fileContents = file_get_contents($file);
+      $files_to_update_base64[$file] = base64_encode($fileContents);
+    }
+    // Build the prompt
+    $prompt = 'Return JSON response only.';
+    $prompt .= 'You are providing file additions or revisions based on request in a JSON array structured like: {"revised_files":{"/path/to/file": "new_file_contents"}}';
+    $prompt .= 'Every filename should prefix with the absolute path to where it needs to be written ultimately, which is ' . $absolute_path_to_module . '.';
+    if (!empty($files_to_update)) {
+      $prompt .= 'The user has indicated these files as part of the update context that may possibly need updating: ' . json_encode($files_to_update) . '.';
+    }
+    $prompt .= 'The updates specifically needed are: ' . $custom_requests . '.';
+
+    $response = $this->aqtoAiCoreUtilities->getOpenAiJsonResponse($prompt);
+    // Lets log out the raw response json for audting in watchdog
+    \Drupal::logger('aqto_ai_codegen')->info('Raw response json: ' . json_encode($response));
+    // At this point we have a 'revised_files' array, loop through and for each, base64 decode the 'value' key and then write it to the 'filename' path.
+    foreach ($response['revised_files'] as $file_path => $file_val) {
+      $this->fileManager->writeFile($file_path, $file_val);
+    }
+
+    return $this->getStandardizedResult('enhance_files_in_module', $response);
+
+  }
+
+  /**
    * Build a prompt that will indicate to the llm that they have base64 encoded config, and they want to return a json response with details about a design spec. Specifically, provide a 'module_hooks' array of any hook_preprocess_HOOK functions that can be written directly into the the .module of the project, a 'theme_hooks' that we'll add or ammend in the .module's hook_theme(), should include the 'variables' key and the 'template-name' key so we can write that data and create the template file.
    * 
    * @param string $modulePath

@@ -51,6 +51,54 @@ final class FileManager {
     return $result;
   }
 
+
+  /**
+   * A utility to get all the files and nested files in a single array with absolute paths.
+   */
+  public function listFilesInModule(string|NULL $module_name): array
+  {
+    if (!$module_name) {
+      return [];
+    }
+    $fileManager = \Drupal::service('aqto_ai_codegen.file_manager');
+    $module_path = \Drupal::service('extension.list.module')->getPath($module_name);
+    try {
+      $directoryContents = $fileManager->listFilesInDirectory($module_path);
+
+      $fileOptions = [];
+      foreach ($directoryContents['files'] as $file) {
+        $fileOptions[$file] = $file;
+      }
+      // We want to go 2 folder levels deep, iterating and including those files and paths for selection.
+      foreach ($directoryContents['folders'] as $directory) {
+        $subDirectoryContents = $fileManager->listFilesInDirectory($directory);
+        foreach ($subDirectoryContents['files'] as $file) {
+          $fileOptions[$file] = $file;
+        }
+
+        // We want to go to a Subsub level
+        foreach ($subDirectoryContents['folders'] as $subDirectory) {
+          $subSubDirectoryContents = $fileManager->listFilesInDirectory($subDirectory);
+          foreach ($subSubDirectoryContents['files'] as $file) {
+            $fileOptions[$file] = $file;
+          }
+
+          // We want to go to a Subsubsub level
+          foreach ($subSubDirectoryContents['folders'] as $subSubDirectory) {
+            $subSubSubDirectoryContents = $fileManager->listFilesInDirectory($subSubDirectory);
+            foreach ($subSubSubDirectoryContents['files'] as $file) {
+              $fileOptions[$file] = $file;
+            }
+          }
+        }
+
+        return $fileOptions;
+      }
+    } catch (\InvalidArgumentException $e) {
+      return [];
+    }
+  }
+
   /**
    * A writeFile method that will write a file to a specified directory.
    * 
@@ -60,6 +108,11 @@ final class FileManager {
    * 
    */
   public function writeFile(string $filepath, string $content): bool {
+    // We want to make sure we generate subfolders if necessary to write the file properly.
+    $directory = dirname($filepath);
+    if (!is_dir($directory)) {
+      $this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
+    }
     return file_put_contents($filepath, $content) !== FALSE;
   }
 }

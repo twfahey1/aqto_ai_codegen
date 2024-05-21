@@ -153,14 +153,14 @@ final class FeatureEnhancer
     $files_to_update_base64 = [];
     foreach ($files_to_update as $file) {
       $fileContents = file_get_contents($file);
-      $files_to_update_base64[$file] = base64_encode($fileContents);
+      $files_to_update_base64[$file] = $fileContents;
     }
     // Build the prompt
     $prompt = 'Return JSON response only.';
-    $prompt .= 'You are providing file additions or revisions based on request in a JSON array structured like: {"revised_files":{"/path/to/file": "new_file_contents"}}';
+    $prompt .= 'You are providing file additions or updates based on request in a JSON array structured like: {"revised_files":{"/path/to/file": "new_file_contents"}}';
     $prompt .= 'Every filename should prefix with the absolute path to where it needs to be written ultimately, which is ' . $absolute_path_to_module . '.';
     if (!empty($files_to_update)) {
-      $prompt .= 'The user has indicated these files as part of the update context that may possibly need updating: ' . json_encode($files_to_update) . '.';
+      $prompt .= 'The user has indicated these files as part of the update context that may possibly need updating, the provided JSON map of file path and contents is: ' . json_encode($files_to_update) . '.';
     }
     $prompt .= 'The updates specifically needed are: ' . $custom_requests . '.';
 

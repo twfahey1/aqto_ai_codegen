@@ -81,13 +81,33 @@ final class FeatureEnhancerForm extends FormBase
       '#prefix' => '<div id="file-list">',
       '#suffix' => '</div>',
     ];
+    // We want to add a "selec tall"
+    $form['module_fieldset']['select_all'] = [
+      '#type' => 'button',
+      '#value' => $this->t('Select all'),
+      '#ajax' => [
+        'callback' => '::selectAllFilesCallback',
+        'event' => 'click',
+        'wrapper' => 'file-list',
+      ],
+    ];
+
+    $form['module_fieldset']['refresh_files'] = [
+      '#type' => 'button',
+      '#value' => $this->t('Refresh files'),
+      '#ajax' => [
+        'callback' => '::refreshFilesCallback',
+        'event' => 'click',
+        'wrapper' => 'file-list',
+      ],
+    ];
+
 
     // A textfield for the component name.
     $form['component_builder']['custom_requests'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Custom update requests'),
       '#description' => $this->t('Things about this update we want. We could do a general file operation like "Create a new file called foo.csv", or we could be more specific about including specific code, such as "Add a new field to the form that allows the user to upload a file.". The files selected above will be sent along with the request to form the new files that will be written.'),
-      '#required' => TRUE,
     ];
 
     // A collapsible "detailed example" that is collapsed by default we can show a more advanced example.
@@ -116,6 +136,18 @@ final class FeatureEnhancerForm extends FormBase
   }
 
   /**
+   * selectAllFilesCallback
+   */
+  public function selectAllFilesCallback(array &$form, FormStateInterface $form_state): array
+  {
+    $files = $form['component_builder']['files_to_update']['#options'];
+    foreach ($files as $key => $file) {
+      $form['component_builder']['files_to_update'][$key]['#checked'] = TRUE;
+    }
+    return $form['component_builder']['files_to_update'];
+  }
+
+  /**
    * The refreshModulesAjax callback
    */
   public function refreshModulesAjax(array &$form, FormStateInterface $form_state): array
@@ -127,7 +159,30 @@ final class FeatureEnhancerForm extends FormBase
     // Return the response.
     return $form['module_fieldset'];
   }
+  /**
+   * AJAX callback to refresh files.
+   */
+  public function refreshFilesCallback(array &$form, FormStateInterface $form_state)
+  {
+    $module_name = $form_state->getValue('module_name');
+    $fileManager = \Drupal::service('aqto_ai_codegen.file_manager');
 
+    $response = new AjaxResponse();
+    if ($module_name) {
+      $module_path = \Drupal::service('extension.list.module')->getPath($module_name);
+      try {
+        $file_manager = \Drupal::service('aqto_ai_codegen.file_manager');
+        $fileOptions = $file_manager->listFilesInModule($module_name);
+        $form['component_builder']['files_to_update']['#options'] = $fileOptions;
+
+        $response->addCommand(new ReplaceCommand('#file-list', $form['component_builder']['files_to_update']));
+      } catch (\InvalidArgumentException $e) {
+        $response->addCommand(new HtmlCommand('#file-list', '<div class="error-message">' . $this->t('Error: @error', ['@error' => $e->getMessage()]) . '</div>'));
+      }
+    }
+
+    return $response;
+  }
 
   /**
    * AJAX callback to load files from the selected module.
@@ -142,7 +197,7 @@ final class FeatureEnhancerForm extends FormBase
       $module_path = \Drupal::service('extension.list.module')->getPath($module_name);
       try {
         $file_manager = \Drupal::service('aqto_ai_codegen.file_manager');
-        $fileOptions = $file_manager->listFilesInModule($module_name);        
+        $fileOptions = $file_manager->listFilesInModule($module_name);
         $form['component_builder']['files_to_update']['#options'] = $fileOptions;
 
         $response->addCommand(new ReplaceCommand('#file-list', $form['component_builder']['files_to_update']));
@@ -172,7 +227,7 @@ final class FeatureEnhancerForm extends FormBase
 
     // Invoke the feature enhancer.
     $response_message = $feature_enhancer->enhanceFilesInModule($module_name, $absolute_path_to_module, $files_to_update, $custom_requests);
-    
+
     // Create a response object.
     $response = new AjaxResponse();
     // Add a command to replace the output div with the response.

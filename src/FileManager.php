@@ -92,11 +92,14 @@ final class FileManager {
           }
         }
 
-        return $fileOptions;
       }
+
+
     } catch (\InvalidArgumentException $e) {
       return [];
     }
+
+    return $fileOptions;
   }
 
   /**

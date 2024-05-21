@@ -42,6 +42,8 @@ final class FeatureEnhancerForm extends FormBase
     $form['module_fieldset'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Module selection'),
+      '#prefix' => '<div class="max-w-xl p-4 border-blue-800 border-solid border-8">',
+      '#suffix' => '</div>',
     ];
     $form['module_fieldset']['module_name'] = [
       '#type' => 'select',
@@ -52,7 +54,7 @@ final class FeatureEnhancerForm extends FormBase
         'callback' => '::loadModuleFilesAjax',
         'wrapper' => 'file-list',
       ],
-      '#prefix' => '<div id="module-output">',
+      '#prefix' => '<div id="module-output" class="pb-2">',
       '#suffix' => '</div>',
     ];
     // Lets add a "Refresh modules" that will invoke an ajax we'll write that refreshes the list
@@ -63,12 +65,16 @@ final class FeatureEnhancerForm extends FormBase
         'callback' => '::refreshModulesAjax',
         'wrapper' => 'module-output',
       ],
+
     ];
 
     // Start a fieldgroup area for "Component Builder"
     $form['component_builder'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Component Builder'),
+      '#prefix' => '<div class="w-full p-4 border-green-800 border-solid border-8">',
+      '#suffix' => '</div>',
+
     ];
 
     // File selector
@@ -108,6 +114,9 @@ final class FeatureEnhancerForm extends FormBase
       '#type' => 'textarea',
       '#title' => $this->t('Custom update requests'),
       '#description' => $this->t('Things about this update we want. We could do a general file operation like "Create a new file called foo.csv", or we could be more specific about including specific code, such as "Add a new field to the form that allows the user to upload a file.". The files selected above will be sent along with the request to form the new files that will be written.'),
+      '#rows' => 5,
+      '#required' => FALSE,
+      '#placeholder' => 'Lets do a 1 - 4 column as well with similar tailwind logic, lets include some logical md: and lg: classes as well for responsiveness',
     ];
 
     // A collapsible "detailed example" that is collapsed by default we can show a more advanced example.

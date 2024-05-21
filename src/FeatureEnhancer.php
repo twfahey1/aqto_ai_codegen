@@ -157,19 +157,39 @@ final class FeatureEnhancer
     }
     // Build the prompt
     $prompt = 'Return JSON response only.';
-    $prompt .= 'You are providing file additions or updates based on request in a JSON array structured like: {"revised_files":{"/path/to/file": "new_file_contents"}}';
+    $prompt .= 'You are providing file additions or updates based on request in a JSON array structured like: {
+      "revised_files":
+        {
+          "/path/to/file": {
+            "path_to_file": "the absolute path",
+            "op": "the operation on the file to do: replace, insert, delete",
+            "position_to_start": "if applicable, the position to start the insertion, which will be used like substr_replace($file, $data_to_write, $position_to_start, 0);",
+            "content": "if applicable, the content to insert in raw form"
+          }
+        }
+    }';
     $prompt .= 'Every filename should prefix with the absolute path to where it needs to be written ultimately, which is ' . $absolute_path_to_module . '.';
     if (!empty($files_to_update)) {
       $prompt .= 'The user has indicated these files as part of the update context that may possibly need updating, the provided JSON map of file path and contents is: ' . json_encode($files_to_update) . '.';
     }
     $prompt .= 'The updates specifically needed are: ' . $custom_requests . '.';
-
+    $prompt .= 'Its critical we dont remove chunks of code unless specifically required by the update requests. So dont provide contents that would overwrite existing unrelated functionality.';
     $response = $this->aqtoAiCoreUtilities->getOpenAiJsonResponse($prompt);
     // Lets log out the raw response json for audting in watchdog
     \Drupal::logger('aqto_ai_codegen')->info('Raw response json: ' . json_encode($response));
     // At this point we have a 'revised_files' array, loop through and for each, base64 decode the 'value' key and then write it to the 'filename' path.
     foreach ($response['revised_files'] as $file_path => $file_val) {
-      $this->fileManager->writeFile($file_path, $file_val);
+      switch  ($file_val['op']) {
+        case 'replace':
+          $this->fileManager->writeFile($file_path, $file_val['content']);
+          break;
+        case 'insert':
+          $this->fileManager->writeToFileAtPosition($file_path, $file_val['position_to_start'], $file_val['content']);
+          break;
+        case 'delete':
+          $this->fileManager->deleteFile($file_path);
+          break;
+      }
     }
 
     return $this->getStandardizedResult('enhance_files_in_module', $response);

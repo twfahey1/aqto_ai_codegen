@@ -118,4 +118,32 @@ final class FileManager {
     }
     return file_put_contents($filepath, $content) !== FALSE;
   }
+
+  /**
+   * A method that will take args of:
+   * - file path to file absolute path
+   * - position_to_start - the position to start in file
+   * - data_to_write - the data to write to the file
+   * 
+   * The idea is we will receive a payload from our API that will indicate a chunk of data and where in a given file to write it.
+   * 
+   * @param string $filepath The absolute path to write.
+   * @param int $position_to_start The position to start in the file.
+   * @param string $data_to_write The data to write to the file.
+   * 
+   * @return bool TRUE if the file was written successfully, FALSE otherwise.
+   */
+  public function writeToFileAtPosition(string $filepath, int $position_to_start, string $data_to_write): bool {
+    $file = file_get_contents($filepath);
+    $file = substr_replace($file, $data_to_write, $position_to_start, 0);
+    return file_put_contents($filepath, $file) !== FALSE;
+  }
+
+  // a deleteFile method that will delete a file from a specified ab path
+  public function deleteFile(string $filepath): bool {
+    return unlink($filepath);
+  }
+
+
+
 }
